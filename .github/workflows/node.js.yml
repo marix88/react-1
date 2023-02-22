@@ -2,6 +2,10 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
 name: Node.js CI
+env: 
+  SCREENER_API_KEY: ${{ secrets.SCREENER_API_KEY }}
+  SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+  SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
 
 on:
   push:
@@ -26,6 +30,23 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - name: Install dependencies
+    #Using npm ci is generally faster than running npm install
+      run: |
+        cd react-app-1
+        npm ci
+    - name: Build the app
+      run: |
+        cd react-app-1
+        npm run build
+    - name: Run component test
+      run: |
+        cd react-app-1
+        npm run test
+    - name: Start the app
+      run: |
+        cd react-app-1
+        npm start
+        npx wait-on --timeout 60000
+        
+
